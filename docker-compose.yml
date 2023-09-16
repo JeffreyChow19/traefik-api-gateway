@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  reverse-proxy:
+    image: traefik:v2.10
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  quotes:
+    image: quotes
+    labels:
+      - "traefik.http.middlewares.strip-quotes.stripprefix.prefixes=/quotes"
+      - "traefik.http.routers.quotes.rule=PathPrefix(`/quotes`)"
+      - "traefik.http.routers.quotes.middlewares=strip-quotes@docker"
+  numbers:
+    image: numbers
+    labels:
+      - "traefik.http.middlewares.strip-numbers.stripprefix.prefixes=/numbers"
+      - "traefik.http.routers.numbers.rule=PathPrefix(`/numbers`)"
+      - "traefik.http.routers.numbers.middlewares=strip-numbers@docker"
